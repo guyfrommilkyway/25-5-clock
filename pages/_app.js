@@ -1,5 +1,6 @@
-import '@/styles/globals.css'
+// import assets below
+import '@/styles/global.scss';
 
 export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return <Component {...pageProps} />;
 }
