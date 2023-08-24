@@ -7,11 +7,13 @@ import Controls from '@/components/Controls';
 
 const Clock = () => {
   return (
-    <div id='clock'>
-      <h1 className='mb-5'>25 + 5 Clock</h1>
-      <Inputs />
-      <Timer />
-      <Controls />
+    <div className='clock'>
+      <div className='clock__content'>
+        <h1 className='mb-5 text-center text-uppercase'>25+5 Clock</h1>
+        <Inputs />
+        <Timer />
+        <Controls />
+      </div>
     </div>
   );
 };
