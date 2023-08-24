@@ -6,10 +6,16 @@ import { FaMinus } from 'react-icons/fa6';
 
 const DecrementButton = (props) => {
   // destructure props
-  const { id } = props;
+  const { id, onDecrement, disabled } = props;
 
   return (
-    <Button variant='danger' size='sm' id={id}>
+    <Button
+      variant='danger'
+      size='sm'
+      id={id}
+      onClick={onDecrement}
+      disabled={disabled}
+    >
       <FaMinus />
     </Button>
   );
