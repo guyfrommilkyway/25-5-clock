@@ -1,68 +1,68 @@
 // import packages below
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 // import utils below
-import { stop, update } from '@/features/clock/clockSlice';
+import { update } from '@/features/clock/clockSlice';
 
 // import helpers below
-import { getEndTime, getTimeLeft } from '@/helpers';
+import { getTimeLeft } from '@/helpers';
 
 const Timer = () => {
   // access store
-  const { isPlaying, isSessionEnded, timer, endTime, breakLength } =
-    useSelector((state) => state.counter);
+  const counter = useSelector((state) => state.counter);
   const dispatch = useDispatch();
 
-  const newEndTime = useMemo(() => {
-    if (isSessionEnded) return getEndTime(breakLength);
-  }, [isSessionEnded]);
+  const audioRef = useRef();
 
-  // countdown timer
+  const playHandler = useCallback(() => {
+    audioRef.current.currentTime = 0;
+    audioRef.current.volume = 0.5;
+    audioRef.current.play();
+  }, [audioRef.current]);
+
+  // countdown
   useEffect(() => {
-    const countdown = setInterval(() => {
-      // stop
-      if (!isPlaying) clearInterval(countdown);
+    let countdown;
 
-      if (isPlaying) {
-        const timeLeft = isSessionEnded
-          ? getTimeLeft(newEndTime)
-          : getTimeLeft(endTime);
+    if (counter.isPlaying) {
+      countdown = setInterval(() => {
+        const timeLeft = getTimeLeft(counter.endTime);
 
-        console.log(`${timeLeft.minutes}:${timeLeft.seconds}`);
+        dispatch(update({ type: 'SET_TIMER', data: timeLeft }));
 
-        // set state
-        dispatch(
-          update({
-            type: 'SET_TIMER',
-            data: `${timeLeft.minutes.toString()}:${timeLeft.seconds.toString()}`,
-          })
-        );
+        console.log(timeLeft);
 
-        if (+timeLeft.minutes <= 0 && +timeLeft.seconds <= 0) {
-          if (isSessionEnded) {
+        // stop
+        if (timeLeft === '00:00') {
+          playHandler();
+
+          if (counter.isSessionEnded) {
             dispatch(update({ type: 'BREAK_ENDED' }));
-            dispatch(stop());
+            clearInterval(countdown);
+          } else {
+            dispatch(update({ type: 'SESSION_ENDED' }));
+            clearInterval(countdown);
           }
-
-          console.log('Session ended.');
-          dispatch(update({ type: 'SESSION_ENDED', data: newEndTime }));
         }
-      }
-    }, 1000);
+      }, 1000);
+    }
+
+    if (counter.isReset) clearInterval(countdown);
 
     // clean up function
     return () => clearInterval(countdown);
-  }, [isPlaying, isSessionEnded]);
+  }, [counter.isPlaying, counter]);
 
   return (
     <div className='mb-4 p-4 text-center'>
       <h4 className='text-center' id='timer-label'>
-        {!isSessionEnded ? 'SESSION' : 'BREAK'}
+        {!counter.isSessionEnded ? 'SESSION' : 'BREAK'}
       </h4>
       <span className='mx-auto fs-1' id='time-left'>
-        {timer}
+        {counter.timer}
       </span>
+      <audio id='beep' preload='auto' src='/beep.mp3' ref={audioRef}></audio>
     </div>
   );
 };

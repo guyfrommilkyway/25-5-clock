@@ -2,12 +2,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // import helpers below
-import { cleanTime, getNowTime, getEndTime, getDiffTime } from '@/helpers';
+import { getEndTime, getDiffTime } from '@/helpers';
 
 // constant variables
 const initialState = {
   isPlaying: false,
   isSessionEnded: false,
+  isReset: false,
   timer: '25:00',
   endTime: 0,
   remainingTime: 0,
@@ -21,11 +22,11 @@ const clockSlice = createSlice({
   reducers: {
     start: (state) => {
       state.isPlaying = true;
-
-      const end = getEndTime(state.sessionLength, state.remainingTime);
-
-      state.endTime = end;
-      state.remainingTime = end - getNowTime();
+      state.isReset = false;
+      state.endTime =
+        state.remainingTime === 0
+          ? getEndTime(state.sessionLength * 60 * 1000)
+          : getEndTime(state.remainingTime);
     },
     pause: (state) => {
       state.isPlaying = false;
@@ -38,12 +39,13 @@ const clockSlice = createSlice({
           break;
         case 'SESSION_ENDED':
           state.isSessionEnded = true;
-          state.endTime = 0;
-          state.remainingTime = 0;
+          state.timer = state.breakLength.toString().padStart(2, '0') + ':00';
+          state.endTime = getEndTime(state.breakLength * 60 * 1000);
           break;
         case 'BREAK_ENDED':
-          state.endTime = 0;
-          state.remainingTime = 0;
+          state.isSessionEnded = false;
+          state.timer = state.sessionLength.toString().padStart(2, '0') + ':00';
+          state.endTime = getEndTime(state.sessionLength * 60 * 1000);
           break;
         default:
           break;
@@ -52,6 +54,7 @@ const clockSlice = createSlice({
     stop: (state) => {
       state.isPlaying = false;
       state.isSessionEnded = false;
+      state.isReset = true;
       state.timer = '25:00';
       state.endTime = 0;
       state.remainingTime = 0;
@@ -69,7 +72,7 @@ const clockSlice = createSlice({
           break;
         case 'SESSION_LENGTH':
           state.sessionLength < 60 && state.sessionLength++;
-          state.timer = `${cleanTime(state.sessionLength)}:00`;
+          state.timer = state.sessionLength.toString().padStart(2, '0') + ':00';
           state.endTime = 0;
           state.remainingTime = 0;
           break;
@@ -88,7 +91,7 @@ const clockSlice = createSlice({
           break;
         case 'SESSION_LENGTH':
           state.sessionLength > 1 && state.sessionLength--;
-          state.timer = `${cleanTime(state.sessionLength)}:00`;
+          state.timer = state.sessionLength.toString().padStart(2, '0') + ':00';
           state.endTime = 0;
           state.remainingTime = 0;
           break;
