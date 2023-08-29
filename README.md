@@ -1,3 +1,7 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9b2705b2-f72b-4dd4-90f1-5b7d791ff6fd/deploy-status)](https://app.netlify.com/sites/aft-25-5-clock/deploys)
+
+Check this out on https://aft-25-5-clock.netlify.app.
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
